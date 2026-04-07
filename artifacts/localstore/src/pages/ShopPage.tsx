@@ -154,10 +154,10 @@ export default function ShopPage() {
         {/* Grid */}
         <div className="flex-1 min-w-0">
           {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-4 sm:gap-y-8">
+            <div className="grid grid-cols-2 landscape:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-4 sm:gap-y-10">
               {Array.from({ length: 12 }).map((_, i) => (
                 <div key={i} className="space-y-3">
-                  <Skeleton className="aspect-square rounded-lg" />
+                  <Skeleton className="aspect-square" />
                   <Skeleton className="h-3 w-16" />
                   <Skeleton className="h-4 w-32" />
                   <Skeleton className="h-4 w-16" />
@@ -172,7 +172,7 @@ export default function ShopPage() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-4 sm:gap-y-8">
+            <div className="grid grid-cols-2 landscape:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-4 sm:gap-y-10">
               {products?.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

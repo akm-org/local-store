@@ -273,3 +273,27 @@
     inset: -1px;
   }
 }
+
+/* Marquee animation */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Hide scrollbar for category horizontal scroll */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Landscape phone support */
+@media (orientation: landscape) and (max-height: 500px) {
+  .landscape\:min-h-\[100vh\] { min-height: 100vh; }
+  .landscape\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .landscape\:pb-12 { padding-bottom: 3rem; }
+  .landscape\:text-6xl { font-size: 3.75rem; line-height: 1; }
+  .landscape\:hidden { display: none; }
+}
