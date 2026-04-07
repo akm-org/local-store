@@ -1,0 +1,10 @@
+{
+  "installCommand": "cd artifacts/localstore && npm install --legacy-peer-deps",
+  "buildCommand": "cd artifacts/localstore && npm run build",
+  "outputDirectory": "artifacts/localstore/dist/public",
+  "framework": null,
+  "env": {
+    "BASE_PATH": "/",
+    "VERCEL": "1"
+  }
+}
