@@ -1,27 +1,53 @@
-# Workspace
+# LOCALSTORE — Nike-Inspired E-Commerce
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+Full-stack e-commerce app (pnpm monorepo). Minimal Nike.in-inspired design, black & white palette, bold Inter typography.
 
-## Stack
+## Architecture
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+- **Frontend**: React + Vite (`artifacts/localstore`) — TypeScript, shadcn/ui, Tailwind CSS, wouter routing
+- **Backend**: Express 5 API (`artifacts/api-server`) — TypeScript, PostgreSQL, Drizzle ORM
+- **API layer**: OpenAPI spec in `lib/api-spec/`, auto-generated React Query hooks in `lib/api-client-react/`
+
+## Pages
+
+| Route | Page |
+|---|---|
+| `/` | Homepage (hero, categories, featured products) |
+| `/shop` | Shop with category filter, search, sort |
+| `/product/:id` | Product detail |
+| `/cart` | Cart with qty controls |
+| `/checkout` | Address + QR payment + UTR submission |
+| `/orders` | Order history + tracking |
+| `/wishlist` | Saved products |
+| `/login` / `/signup` | Auth |
+| `/admin/login` | Admin login (`admin` / `webdeveloper`) |
+| `/admin` | Dashboard (stats + recent orders) |
+| `/admin/products` | CRUD products |
+| `/admin/orders` | Update order status |
+| `/admin/payment` | Configure QR code + UPI ID |
+
+## Database (PostgreSQL + Drizzle)
+
+Tables: `users`, `products`, `cart_items`, `orders`, `order_items`, `wishlist`, `settings`
+
+## Auth
+
+- Users: JWT stored in `localStorage` (`ls_token`, `ls_user`)
+- Admin: hardcoded `username=admin`, `password=webdeveloper`
+- Admin flag: `ls_admin=true`
+
+## Categories
+
+Dress, Lifestyle, Essentials, Electronics, Accessories
 
 ## Key Commands
 
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- `pnpm --filter @workspace/api-server run dev` — run API server locally
+- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks from OpenAPI spec
+- `pnpm --filter @workspace/db run push` — push DB schema changes
 
-See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+## Stack
+
+- pnpm workspaces, Node.js 24, TypeScript 5.9
+- Express 5, Drizzle ORM, Zod, Orval codegen, esbuild
