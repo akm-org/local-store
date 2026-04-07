@@ -15,21 +15,21 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="pt-14 min-h-[90vh] flex flex-col justify-center border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-32">
+      <section className="pt-14 min-h-[80vh] sm:min-h-[90vh] flex flex-col justify-center border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 md:py-32">
           <div className="max-w-2xl">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">New Season Collection</p>
-            <h1 className="text-5xl sm:text-7xl md:text-8xl font-black leading-none tracking-tight mb-8">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4 sm:mb-6">New Season Collection</p>
+            <h1 className="text-4xl sm:text-6xl md:text-8xl font-black leading-none tracking-tight mb-6 sm:mb-8">
               JUST<br />YOUR<br />STYLE.
             </h1>
-            <p className="text-lg text-muted-foreground mb-10 max-w-sm leading-relaxed">
+            <p className="text-base sm:text-lg text-muted-foreground mb-8 sm:mb-10 max-w-sm leading-relaxed">
               Quality products curated for modern living. Dress, lifestyle, essentials and more — delivered to your door.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-3 sm:gap-4">
               <Button
                 size="lg"
                 onClick={() => setLocation("/shop")}
-                className="rounded-none px-8"
+                className="rounded-none px-5 sm:px-8 text-sm sm:text-base"
                 data-testid="button-shop-now"
               >
                 Shop Now
@@ -38,7 +38,7 @@ export default function HomePage() {
                 size="lg"
                 variant="outline"
                 onClick={() => setLocation("/shop?category=Dress")}
-                className="rounded-none px-8"
+                className="rounded-none px-5 sm:px-8 text-sm sm:text-base"
                 data-testid="button-explore"
               >
                 Explore
