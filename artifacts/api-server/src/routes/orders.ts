@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { store } from "../data/store";
+import { db } from "../db/client";
 import { ListOrdersQueryParams, CreateOrderBody, GetOrderParams, UpdateOrderStatusParams, UpdateOrderStatusBody } from "@workspace/api-zod";
 
 const router = Router();
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const query = ListOrdersQueryParams.parse(req.query);
-    const orders = store.orders.list(query.userId);
+    const orders = await db.orders.list(query.userId);
     res.json(orders);
   } catch (err) {
     req.log.error({ err }, "Error listing orders");
@@ -15,11 +15,11 @@ router.get("/", (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const body = CreateOrderBody.parse(req.body);
-    const user = store.users.get(body.userId);
-    const order = store.orders.create({
+    const user = await db.users.get(body.userId);
+    const order = await db.orders.create({
       userId: body.userId,
       userName: user?.name ?? body.userId,
       items: body.items as any,
@@ -28,7 +28,7 @@ router.post("/", (req, res) => {
       phone: body.phone,
       utr: body.utr ?? "",
     });
-    store.cart.clear(body.userId);
+    await db.cart.clear(body.userId);
     res.status(201).json(order);
   } catch (err) {
     req.log.error({ err }, "Error creating order");
@@ -36,10 +36,10 @@ router.post("/", (req, res) => {
   }
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const { id } = GetOrderParams.parse(req.params);
-    const order = store.orders.get(id);
+    const order = await db.orders.get(id);
     if (!order) return res.status(404).json({ error: "Not found" });
     res.json(order);
   } catch (err) {
@@ -48,11 +48,11 @@ router.get("/:id", (req, res) => {
   }
 });
 
-router.patch("/:id/status", (req, res) => {
+router.patch("/:id/status", async (req, res) => {
   try {
     const { id } = UpdateOrderStatusParams.parse(req.params);
     const body = UpdateOrderStatusBody.parse(req.body);
-    const order = store.orders.updateStatus(id, body.status, body.utr);
+    const order = await db.orders.updateStatus(id, body.status, body.utr);
     if (!order) return res.status(404).json({ error: "Not found" });
     res.json(order);
   } catch (err) {
