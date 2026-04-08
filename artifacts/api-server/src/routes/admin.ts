@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { store } from "../data/store";
+import { db } from "../db/client";
 import { UpdatePaymentQRBody } from "@workspace/api-zod";
 
 const router = Router();
 
-router.get("/stats", (req, res) => {
+router.get("/stats", async (req, res) => {
   try {
-    const stats = store.stats();
+    const stats = await db.stats();
     res.json(stats);
   } catch (err) {
     req.log.error({ err }, "Error getting stats");
@@ -14,9 +14,9 @@ router.get("/stats", (req, res) => {
   }
 });
 
-router.get("/payment", (req, res) => {
+router.get("/payment", async (req, res) => {
   try {
-    const settings = store.settings.get();
+    const settings = await db.settings.get();
     res.json({ upiId: settings.upiId, qrImage: settings.qrImage });
   } catch (err) {
     req.log.error({ err }, "Error getting payment settings");
@@ -24,10 +24,10 @@ router.get("/payment", (req, res) => {
   }
 });
 
-router.put("/payment", (req, res) => {
+router.put("/payment", async (req, res) => {
   try {
     const body = UpdatePaymentQRBody.parse(req.body);
-    const settings = store.settings.update({ upiId: body.upiId, qrImage: body.qrImage });
+    const settings = await db.settings.update({ upiId: body.upiId, qrImage: body.qrImage });
     res.json({ upiId: settings.upiId, qrImage: settings.qrImage });
   } catch (err) {
     req.log.error({ err }, "Error updating payment settings");
