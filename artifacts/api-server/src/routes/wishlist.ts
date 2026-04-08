@@ -1,45 +1,26 @@
 import { Router } from "express";
-import { db } from "@workspace/db";
-import { wishlistTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { store } from "../data/store";
 import { GetWishlistQueryParams, ToggleWishlistBody } from "@workspace/api-zod";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
+router.get("/", (req, res) => {
   try {
     const { userId } = GetWishlistQueryParams.parse(req.query);
-    const items = await db.select().from(wishlistTable).where(eq(wishlistTable.userId, userId));
-    res.json({
-      userId,
-      productIds: items.map(i => i.productId),
-    });
+    const productIds = store.wishlist.get(userId);
+    res.json({ userId, productIds });
   } catch (err) {
     req.log.error({ err }, "Error getting wishlist");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/toggle", (req, res) => {
   try {
     const body = ToggleWishlistBody.parse(req.body);
-    const existing = await db.select().from(wishlistTable).where(
-      and(eq(wishlistTable.userId, body.userId), eq(wishlistTable.productId, body.productId))
-    );
-
-    if (existing.length > 0) {
-      await db.delete(wishlistTable).where(
-        and(eq(wishlistTable.userId, body.userId), eq(wishlistTable.productId, body.productId))
-      );
-    } else {
-      await db.insert(wishlistTable).values({ userId: body.userId, productId: body.productId });
-    }
-
-    const items = await db.select().from(wishlistTable).where(eq(wishlistTable.userId, body.userId));
-    res.json({
-      userId: body.userId,
-      productIds: items.map(i => i.productId),
-    });
+    const added = store.wishlist.toggle(body.userId, body.productId);
+    const productIds = store.wishlist.get(body.userId);
+    res.json({ userId: body.userId, productIds, added });
   } catch (err) {
     req.log.error({ err }, "Error toggling wishlist");
     res.status(500).json({ error: "Internal server error" });

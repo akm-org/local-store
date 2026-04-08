@@ -1,7 +1,5 @@
 import { Router } from "express";
-import { db } from "@workspace/db";
-import { productsTable } from "@workspace/db";
-import { sql } from "drizzle-orm";
+import { store } from "../data/store";
 
 const router = Router();
 
@@ -13,25 +11,14 @@ const CATEGORY_IMAGES: Record<string, string> = {
   Accessories: "https://images.unsplash.com/photo-1523779105320-d1cd346ff52b?w=600&h=600&fit=crop",
 };
 
-router.get("/", async (req, res) => {
+router.get("/", (req, res) => {
   try {
-    const counts = await db
-      .select({
-        name: productsTable.category,
-        count: sql<number>`cast(count(*) as int)`,
-      })
-      .from(productsTable)
-      .groupBy(productsTable.category);
-
-    const categories = ["Dress", "Lifestyle", "Essentials", "Electronics", "Accessories"].map(name => {
-      const found = counts.find(c => c.name === name);
-      return {
-        name,
-        count: found?.count ?? 0,
-        image: CATEGORY_IMAGES[name] ?? "",
-      };
-    });
-
+    const counts = store.products.categories();
+    const categories = ["Dress", "Lifestyle", "Essentials", "Electronics", "Accessories"].map(name => ({
+      name,
+      count: counts[name] ?? 0,
+      image: CATEGORY_IMAGES[name] ?? "",
+    }));
     res.json(categories);
   } catch (err) {
     req.log.error({ err }, "Error listing categories");

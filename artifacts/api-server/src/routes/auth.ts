@@ -1,7 +1,5 @@
 import { Router } from "express";
-import { db } from "@workspace/db";
-import { usersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { store } from "../data/store";
 import { LoginBody, SignupBody, AdminLoginBody } from "@workspace/api-zod";
 
 const router = Router();
@@ -9,25 +7,15 @@ const router = Router();
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "webdeveloper";
 
-function generateId(prefix: string): string {
-  return `${prefix}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`.toUpperCase();
-}
-
-router.post("/login", async (req, res) => {
+router.post("/login", (req, res) => {
   try {
     const body = LoginBody.parse(req.body);
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, body.email));
+    const user = store.users.getByEmail(body.email);
     if (!user || user.password !== body.password) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
     res.json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        address: user.address,
-        phone: user.phone,
-      },
+      user: { id: user.id, name: user.name, email: user.email, address: user.address, phone: user.phone },
       token: `tok_${user.id}`,
       isAdmin: false,
     });
@@ -37,31 +25,20 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/signup", async (req, res) => {
+router.post("/signup", (req, res) => {
   try {
     const body = SignupBody.parse(req.body);
-    const [existing] = await db.select().from(usersTable).where(eq(usersTable.email, body.email));
-    if (existing) {
-      return res.status(409).json({ error: "Email already registered" });
-    }
-    const id = generateId("U");
-    await db.insert(usersTable).values({
-      id,
+    const existing = store.users.getByEmail(body.email);
+    if (existing) return res.status(409).json({ error: "Email already registered" });
+    const user = store.users.create({
       name: body.name,
       email: body.email,
       password: body.password,
-      address: body.address,
-      phone: body.phone,
+      address: body.address ?? "",
+      phone: body.phone ?? "",
     });
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, id));
     res.status(201).json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        address: user.address,
-        phone: user.phone,
-      },
+      user: { id: user.id, name: user.name, email: user.email, address: user.address, phone: user.phone },
       token: `tok_${user.id}`,
       isAdmin: false,
     });
@@ -71,20 +48,14 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.post("/admin-login", async (req, res) => {
+router.post("/admin-login", (req, res) => {
   try {
     const body = AdminLoginBody.parse(req.body);
     if (body.username !== ADMIN_USERNAME || body.password !== ADMIN_PASSWORD) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
     res.json({
-      user: {
-        id: "admin",
-        name: "Admin",
-        email: "admin@localstore.com",
-        address: "",
-        phone: "",
-      },
+      user: { id: "admin", name: "Admin", email: "admin@localstore.com", address: "", phone: "" },
       token: "tok_admin",
       isAdmin: true,
     });
