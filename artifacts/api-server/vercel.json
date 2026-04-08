@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "installCommand": "cd ../.. && npm install --no-frozen-lockfile --legacy-peer-deps",
+  "buildCommand": "node build.mjs",
+  "builds": [
+    {
+      "src": "dist/serverless.mjs",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/dist/serverless.mjs" }
+  ]
+}
