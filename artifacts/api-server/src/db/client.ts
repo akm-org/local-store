@@ -7,6 +7,10 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_KEY env vars");
 }
 
+function isTableMissingError(error: any): boolean {
+  return error && (error.code === "PGRST205" || (error.message && error.message.includes("schema cache")));
+}
+
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: { persistSession: false },
 });
@@ -27,7 +31,7 @@ export const db = {
       else if (params.sort === "price_desc") query = query.order("price", { ascending: false });
       else query = query.order("created_at", { ascending: false });
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) { if (isTableMissingError(error)) return []; throw error; }
       return (data ?? []).map(normalizeProduct);
     },
     async get(id: string) {
@@ -52,7 +56,7 @@ export const db = {
     },
     async categories() {
       const { data, error } = await supabase.from("products").select("category");
-      if (error) throw error;
+      if (error) { if (isTableMissingError(error)) return {}; throw error; }
       const counts: Record<string, number> = {};
       for (const row of data ?? []) {
         counts[row.category] = (counts[row.category] ?? 0) + 1;
@@ -122,7 +126,7 @@ export const db = {
       let query = supabase.from("orders").select("*").order("created_at", { ascending: false });
       if (userId) query = query.eq("user_id", userId);
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) { if (isTableMissingError(error)) return []; throw error; }
       return (data ?? []).map(normalizeOrder);
     },
     async get(id: string) {
@@ -159,7 +163,7 @@ export const db = {
   wishlist: {
     async get(userId: string) {
       const { data, error } = await supabase.from("wishlist").select("product_id").eq("user_id", userId);
-      if (error) throw error;
+      if (error) { if (isTableMissingError(error)) return []; throw error; }
       return (data ?? []).map((r: any) => r.product_id);
     },
     async toggle(userId: string, productId: string) {
@@ -181,7 +185,8 @@ export const db = {
 
   settings: {
     async get() {
-      const { data } = await supabase.from("settings").select("*").eq("id", 1).maybeSingle();
+      const { data, error } = await supabase.from("settings").select("*").eq("id", 1).maybeSingle();
+      if (isTableMissingError(error)) return { upiId: "localstore@upi", qrImage: "" };
       return { upiId: data?.upi_id ?? "localstore@upi", qrImage: data?.qr_image ?? "" };
     },
     async update(input: Partial<{ upiId: string; qrImage: string }>) {
@@ -200,6 +205,9 @@ export const db = {
       supabase.from("users").select("id", { count: "exact", head: true }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
     ]);
+    if (isTableMissingError(productsRes.error) || isTableMissingError(ordersRes.error)) {
+      return { totalProducts: 0, totalOrders: 0, totalUsers: 0, totalRevenue: 0, pendingOrders: 0, recentOrders: [] };
+    }
     const allOrders = (ordersRes.data ?? []).map(normalizeOrder);
     const totalRevenue = allOrders
       .filter((o) => o.status !== "Pending" && o.status !== "Cancelled")
