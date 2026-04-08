@@ -41,7 +41,8 @@ export default function AdminProductsPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const { data: products, isLoading } = useListProducts({});
+  const { data: rawProducts, isLoading } = useListProducts({});
+  const products = Array.isArray(rawProducts) ? rawProducts : [];
 
   const createProduct = useCreateProduct({
     mutation: {
@@ -102,7 +103,7 @@ export default function AdminProductsPage() {
             <ArrowLeft className="h-3 w-3" /> Dashboard
           </button>
           <h1 className="text-2xl font-black tracking-tight">Products</h1>
-          <p className="text-sm text-muted-foreground mt-1">{products?.length ?? 0} products</p>
+          <p className="text-sm text-muted-foreground mt-1">{products.length} products</p>
         </div>
         <Button onClick={openCreate} className="rounded-none" data-testid="button-add-product">
           <Plus className="h-4 w-4 mr-2" /> Add Product
@@ -115,7 +116,7 @@ export default function AdminProductsPage() {
         </div>
       ) : (
         <div className="border border-border divide-y divide-border">
-          {products?.map((product) => (
+          {products.map((product) => (
             <div key={product.id} className="flex items-center gap-4 p-4" data-testid={`product-row-${product.id}`}>
               <div className="w-10 h-10 bg-muted rounded overflow-hidden flex-shrink-0">
                 {product.image && <img src={product.image} alt={product.name} className="w-full h-full object-cover" />}
