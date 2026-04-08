@@ -27,7 +27,8 @@ export default function ShopPage() {
     setSearch(initSearch);
   }, [initCategory, initSearch]);
 
-  const { data: products, isLoading } = useListProducts({ category: category || undefined, search: search || undefined, sort: sort as "newest" | "price_asc" | "price_desc" | "popular" });
+  const { data: rawProducts, isLoading } = useListProducts({ category: category || undefined, search: search || undefined, sort: sort as "newest" | "price_asc" | "price_desc" | "popular" });
+  const products = Array.isArray(rawProducts) ? rawProducts : [];
 
   const clearFilter = (type: "category" | "search") => {
     if (type === "category") setCategory("");
@@ -101,7 +102,7 @@ export default function ShopPage() {
           <h1 className="text-xl sm:text-2xl font-black tracking-tight truncate">
             {category ? category : search ? `"${search}"` : "All Products"}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">{products?.length ?? 0} items</p>
+          <p className="text-sm text-muted-foreground mt-1">{products.length} items</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <Select value={sort} onValueChange={setSort}>
@@ -164,7 +165,7 @@ export default function ShopPage() {
                 </div>
               ))}
             </div>
-          ) : products?.length === 0 ? (
+          ) : products.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-muted-foreground">No products found</p>
               <Button variant="outline" className="mt-4 rounded-none" onClick={() => { setCategory(""); setSearch(""); }}>
@@ -173,7 +174,7 @@ export default function ShopPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 landscape:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-4 sm:gap-y-10">
-              {products?.map((product) => (
+              {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
