@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { store } from "../data/store";
+import { db } from "../db/client";
 import { LoginBody, SignupBody, AdminLoginBody } from "@workspace/api-zod";
 
 const router = Router();
@@ -7,10 +7,10 @@ const router = Router();
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "webdeveloper";
 
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const body = LoginBody.parse(req.body);
-    const user = store.users.getByEmail(body.email);
+    const user = await db.users.getByEmail(body.email);
     if (!user || user.password !== body.password) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
@@ -25,12 +25,12 @@ router.post("/login", (req, res) => {
   }
 });
 
-router.post("/signup", (req, res) => {
+router.post("/signup", async (req, res) => {
   try {
     const body = SignupBody.parse(req.body);
-    const existing = store.users.getByEmail(body.email);
+    const existing = await db.users.getByEmail(body.email);
     if (existing) return res.status(409).json({ error: "Email already registered" });
-    const user = store.users.create({
+    const user = await db.users.create({
       name: body.name,
       email: body.email,
       password: body.password,
@@ -48,7 +48,7 @@ router.post("/signup", (req, res) => {
   }
 });
 
-router.post("/admin-login", (req, res) => {
+router.post("/admin-login", async (req, res) => {
   try {
     const body = AdminLoginBody.parse(req.body);
     if (body.username !== ADMIN_USERNAME || body.password !== ADMIN_PASSWORD) {
