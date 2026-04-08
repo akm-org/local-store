@@ -4,13 +4,34 @@ import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
 import esbuildPluginPino from "esbuild-plugin-pino";
 import { rm } from "node:fs/promises";
+import { execSync } from "node:child_process";
 
 // Plugins (e.g. 'esbuild-plugin-pino') may use `require` to resolve dependencies
 globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
+const monorepoRoot = path.resolve(artifactDir, "../..");
 
 async function buildAll() {
+  // Build the React frontend first
+  const localstoreDir = path.resolve(monorepoRoot, "artifacts/localstore");
+  console.log("Building frontend (localstore)...");
+  try {
+    execSync("npx vite build --config vite.config.ts", {
+      cwd: localstoreDir,
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        NODE_ENV: "production",
+        VERCEL: "1",
+      },
+    });
+    console.log("Frontend build complete.");
+  } catch (err) {
+    console.error("Frontend build failed:", err.message);
+    // Don't fail the entire build if frontend fails
+  }
+
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
 
