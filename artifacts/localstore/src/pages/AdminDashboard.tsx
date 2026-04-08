@@ -16,8 +16,10 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { isAdmin, isLoggedIn } = useAuth();
 
-  const { data: orders, isLoading: ordersLoading } = useListOrders({});
-  const { data: products, isLoading: productsLoading } = useListProducts({});
+  const { data: rawOrders, isLoading: ordersLoading } = useListOrders({});
+  const { data: rawProducts, isLoading: productsLoading } = useListProducts({});
+  const orders = Array.isArray(rawOrders) ? rawOrders : [];
+  const products = Array.isArray(rawProducts) ? rawProducts : [];
 
   if (!isLoggedIn || !isAdmin) {
     return (
@@ -28,10 +30,10 @@ export default function AdminDashboard() {
     );
   }
 
-  const totalRevenue = orders?.filter(o => o.status !== "Cancelled").reduce((sum, o) => sum + o.amount, 0) ?? 0;
-  const pendingOrders = orders?.filter(o => o.status === "Pending").length ?? 0;
-  const totalProducts = products?.length ?? 0;
-  const totalOrders = orders?.length ?? 0;
+  const totalRevenue = orders.filter(o => o.status !== "Cancelled").reduce((sum, o) => sum + o.amount, 0);
+  const pendingOrders = orders.filter(o => o.status === "Pending").length;
+  const totalProducts = products.length;
+  const totalOrders = orders.length;
 
   const stats = [
     { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}`, icon: TrendingUp },
@@ -40,7 +42,7 @@ export default function AdminDashboard() {
     { label: "Products", value: totalProducts, icon: Package },
   ];
 
-  const recentOrders = orders?.slice(0, 5) ?? [];
+  const recentOrders = orders.slice(0, 5);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-20">
