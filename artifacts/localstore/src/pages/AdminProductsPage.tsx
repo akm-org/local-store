@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
-import { useListProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, getListProductsQueryKey } from "@workspace/api-client-react";
+import { useListProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -45,21 +45,21 @@ export default function AdminProductsPage() {
 
   const createProduct = useCreateProduct({
     mutation: {
-      onSuccess: () => { queryClient.invalidateQueries({ queryKey: getListProductsQueryKey({}) }); toast({ title: "Product created" }); closeDialog(); },
+      onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/products"] }); toast({ title: "Product created" }); closeDialog(); },
       onError: () => toast({ title: "Failed to create product", variant: "destructive" }),
     },
   });
 
   const updateProduct = useUpdateProduct({
     mutation: {
-      onSuccess: () => { queryClient.invalidateQueries({ queryKey: getListProductsQueryKey({}) }); toast({ title: "Product updated" }); closeDialog(); },
+      onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/products"] }); toast({ title: "Product updated" }); closeDialog(); },
       onError: () => toast({ title: "Failed to update product", variant: "destructive" }),
     },
   });
 
   const deleteProduct = useDeleteProduct({
     mutation: {
-      onSuccess: () => { queryClient.invalidateQueries({ queryKey: getListProductsQueryKey({}) }); toast({ title: "Product deleted" }); setDeleteId(null); },
+      onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/products"] }); toast({ title: "Product deleted" }); setDeleteId(null); },
       onError: () => toast({ title: "Failed to delete product", variant: "destructive" }),
     },
   });
