@@ -15,10 +15,11 @@ export default function WishlistPage() {
     { query: { enabled: !!user?.id } }
   );
 
-  const { data: allProducts, isLoading: productsLoading } = useListProducts({});
+  const { data: rawAllProducts, isLoading: productsLoading } = useListProducts({});
 
   const isLoading = wishlistLoading || productsLoading;
-  const wishlistProducts = allProducts?.filter(p => wishlist?.productIds?.includes(p.id)) ?? [];
+  const allProducts = Array.isArray(rawAllProducts) ? rawAllProducts : [];
+  const wishlistProducts = allProducts.filter(p => wishlist?.productIds?.includes(p.id));
 
   if (!isLoggedIn) {
     return (
