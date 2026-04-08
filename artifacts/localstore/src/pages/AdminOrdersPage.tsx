@@ -27,7 +27,8 @@ export default function AdminOrdersPage() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data: orders, isLoading } = useListOrders({});
+  const { data: rawOrders, isLoading } = useListOrders({});
+  const orders = Array.isArray(rawOrders) ? rawOrders : [];
 
   const updateStatus = useUpdateOrderStatus({
     mutation: {
@@ -48,7 +49,7 @@ export default function AdminOrdersPage() {
     );
   }
 
-  const filtered = statusFilter === "all" ? orders : orders?.filter(o => o.status === statusFilter);
+  const filtered = statusFilter === "all" ? orders : orders.filter(o => o.status === statusFilter);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-20">
@@ -80,11 +81,11 @@ export default function AdminOrdersPage() {
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
         </div>
-      ) : filtered?.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="py-20 text-center text-muted-foreground">No orders found</div>
       ) : (
         <div className="space-y-4">
-          {filtered?.map((order) => (
+          {filtered.map((order) => (
             <div key={order.id} className="border border-border p-5" data-testid={`admin-order-${order.id}`}>
               <div className="flex items-start justify-between mb-3">
                 <div>
