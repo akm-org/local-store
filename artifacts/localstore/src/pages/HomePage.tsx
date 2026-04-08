@@ -32,10 +32,12 @@ const PROMO_BANNERS = [
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
-  const { data: products, isLoading: productsLoading } = useListProducts({ sort: "newest" });
-  const { data: categories, isLoading: catsLoading } = useListCategories();
+  const { data: rawProducts, isLoading: productsLoading } = useListProducts({ sort: "newest" });
+  const { data: rawCategories, isLoading: catsLoading } = useListCategories();
 
-  const featured = products?.slice(0, 8) ?? [];
+  const products = Array.isArray(rawProducts) ? rawProducts : [];
+  const categories = Array.isArray(rawCategories) ? rawCategories : [];
+  const featured = products.slice(0, 8);
 
   return (
     <div className="min-h-screen">
@@ -112,7 +114,7 @@ export default function HomePage() {
                     <Skeleton className="aspect-[3/4] sm:aspect-square rounded-lg" />
                   </div>
                 ))
-              : categories?.map((cat) => (
+              : categories.map((cat) => (
                   <Link
                     key={cat.name}
                     href={`/shop?category=${cat.name}`}
