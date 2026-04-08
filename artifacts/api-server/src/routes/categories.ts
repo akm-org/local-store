@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { store } from "../data/store";
+import { db } from "../db/client";
 
 const router = Router();
 
@@ -11,9 +11,9 @@ const CATEGORY_IMAGES: Record<string, string> = {
   Accessories: "https://images.unsplash.com/photo-1523779105320-d1cd346ff52b?w=600&h=600&fit=crop",
 };
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const counts = store.products.categories();
+    const counts = await db.products.categories();
     const categories = ["Dress", "Lifestyle", "Essentials", "Electronics", "Accessories"].map(name => ({
       name,
       count: counts[name] ?? 0,
