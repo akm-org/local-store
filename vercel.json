@@ -1,8 +1,17 @@
 {
-  "installCommand": "cd artifacts/localstore && npm install --legacy-peer-deps",
-  "buildCommand": "cd artifacts/localstore && npm run build",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter @workspace/localstore run build",
   "outputDirectory": "artifacts/localstore/dist/public",
   "framework": null,
+  "functions": {
+    "api/server.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/server" }
+  ],
   "env": {
     "BASE_PATH": "/",
     "VERCEL": "1"
