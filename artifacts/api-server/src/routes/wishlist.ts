@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { store } from "../data/store";
+import { db } from "../db/client";
 import { GetWishlistQueryParams, ToggleWishlistBody } from "@workspace/api-zod";
 
 const router = Router();
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const { userId } = GetWishlistQueryParams.parse(req.query);
-    const productIds = store.wishlist.get(userId);
+    const productIds = await db.wishlist.get(userId);
     res.json({ userId, productIds });
   } catch (err) {
     req.log.error({ err }, "Error getting wishlist");
@@ -15,11 +15,11 @@ router.get("/", (req, res) => {
   }
 });
 
-router.post("/toggle", (req, res) => {
+router.post("/toggle", async (req, res) => {
   try {
     const body = ToggleWishlistBody.parse(req.body);
-    const added = store.wishlist.toggle(body.userId, body.productId);
-    const productIds = store.wishlist.get(body.userId);
+    const added = await db.wishlist.toggle(body.userId, body.productId);
+    const productIds = await db.wishlist.get(body.userId);
     res.json({ userId: body.userId, productIds, added });
   } catch (err) {
     req.log.error({ err }, "Error toggling wishlist");
